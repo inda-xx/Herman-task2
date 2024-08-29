@@ -42,8 +42,9 @@ def checkout_branch(branch_name):
         sys.exit(1)
 
 def load_solution_code():
-    hidden_tasks_dir = ".hidden_tasks"
+    hidden_tasks_dir = os.path.join(".hidden_tasks")
 
+    # Ensure the .hidden_tasks directory exists
     if not os.path.exists(hidden_tasks_dir):
         print(f"Error: .hidden_tasks directory does not exist in branch {branch_name}.")
         return None
@@ -67,6 +68,7 @@ def load_solution_code():
 def load_test_code():
     gen_test_dir = "gen_test"
 
+    # Ensure the gen_test directory exists
     if not os.path.exists(gen_test_dir):
         print(f"Error: gen_test directory does not exist in branch {branch_name}.")
         return None
