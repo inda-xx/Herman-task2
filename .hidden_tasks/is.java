@@ -1,0 +1,1 @@
+class is provided to illustrate variable shadowing and how to address it using `this` keyword.

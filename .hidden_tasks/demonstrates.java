@@ -1,0 +1,1 @@
+class demonstrates object-oriented design by encapsulating its fields, using getters and setters, providing movement methods, and handling interactions with an `Enemy` class. The `Example1` 
