@@ -1,0 +1,1 @@
+class is encapsulated with `private` fields and appropriate getters and setters. The `Game` 
