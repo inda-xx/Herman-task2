@@ -18,13 +18,18 @@ def main(api_key):
     language = os.getenv("TASK_LANGUAGE", "English")
 
     # Combine theme into a single prompt
-    prompt = (f"Create a new programming task in {language} with the following theme: {theme}. "
-              "The task should follow a similar structure and format to the provided example, including detailed instructions, preparation steps, learning goals, and assignment description with exercises. "
-              "Make sure to include the title, subtitle, and emojis for aesthetics. "
-              "The task goals must include: Designing Java classes, Adding instance fields, Adding a constructor method, Creating getters and setters, Printing to the terminal, Using the main method, and Scope (or variable shadowing). "
-              "The description should be detailed, well-structured, and aesthetically pleasing to provide thorough instructions for the students. "
-              "Here is an example structure:\n\n"
-              "# Indamon, I choose you!\n\n"
+    learning_goals = """
+              "* Designing Java classes\n"
+              "* Adding instance fields\n"
+              "* Adding a constructor method\n"
+              "* Creating *getters* and *setters*\n"
+              "* Printing to the terminal\n"
+              "* Using the `main` method\n"
+              "* Scope (or *variable shadowing*)\n\n"
+              """
+    
+    original_structure = """
+            "# Indamon, I choose you!\n\n"
               "For the second exercise of INDA, you are going to practice on modelling objects in Java. You are going to acquaint yourself with the components of a Java class.\n\n"
               "### 💀 Deadline\n"
               "This work should be completed before the exercise, on **Friday 16th September**.\n\n"
@@ -201,8 +206,14 @@ def main(api_key):
               "}\n"
               "```\n\n"
               "> **Assistant's Note:** Think about the *local scope*, *global variables* and *instance fields* of the provided examples.\n\n"
-              "### 🐞 Bugs and errors?\n"
-              "If you find any inconsistences or errors in this exercise, please open a [New Issue](https://gits-15.sys.kth.se/inda-22/help/issues/new) with the title \"Task *x* Error: *summary of error here*\". Found bugs will be rewarded by mentions in the acknowledgment section.\n"
+
+              """
+
+    prompt = (f"Create a new programming task in {language} with the following theme: {theme}. "
+              f"It is paramount that the generted task description includes and integrates the concepts of {learning_goals}"
+              f"The task should follow a similar structure and format to the provided example {original_structure} , including detailed instructions, preparation steps, learning goals, and assignment description with exercises. "
+              f"Make sure to include the title, subtitle, and emojis for aesthetics. "
+              f"The description should be detailed, well-structured, and aesthetically pleasing to provide thorough instructions for the students."
              )
 
     # Call OpenAI API to generate the task description
