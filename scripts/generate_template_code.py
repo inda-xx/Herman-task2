@@ -1,16 +1,18 @@
 import os
 import sys
+import subprocess
 
 def main(api_key, branch_name):
     if not api_key:
         print("Error: OpenAI API key is missing.")
         sys.exit(1)
 
-    # Debugging: Print the current directory
-    print(f"Current directory: {os.getcwd()}")
-    
-    # Debugging: List all files in the current directory
-    print("Files in current directory:", os.listdir("."))
+    # Ensure we are on the correct branch
+    if branch_name:
+        checkout_branch(branch_name)
+    else:
+        print("Error: Branch name is required.")
+        sys.exit(1)
 
     # Load the solution
     solution_code = load_solution_code()
@@ -30,6 +32,14 @@ def main(api_key, branch_name):
 
     # Commit and push changes
     commit_and_push_changes(branch_name, "gen_src")
+
+def checkout_branch(branch_name):
+    try:
+        subprocess.run(["git", "checkout", branch_name], check=True)
+        print(f"Checked out branch: {branch_name}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error checking out branch {branch_name}: {e}")
+        sys.exit(1)
 
 def load_solution_code():
     # Debugging: List files in .hidden_tasks
