@@ -42,42 +42,49 @@ def checkout_branch(branch_name):
         sys.exit(1)
 
 def load_solution_code():
-    # Debugging: List files in .hidden_tasks
-    if os.path.exists(".hidden_tasks"):
-        print("Files in .hidden_tasks directory:", os.listdir(".hidden_tasks"))
-    else:
-        print("Error: .hidden_tasks directory does not exist.")
+    hidden_tasks_dir = os.path.join(".hidden_tasks")
+
+    # Ensure the .hidden_tasks directory exists
+    if not os.path.exists(hidden_tasks_dir):
+        print(f"Error: .hidden_tasks directory does not exist in branch {branch_name}.")
         return None
 
     solution_files = []
     try:
-        for filename in os.listdir(".hidden_tasks"):
+        for filename in os.listdir(hidden_tasks_dir):
             if filename.endswith(".java"):
-                with open(os.path.join(".hidden_tasks", filename), "r") as file:
+                with open(os.path.join(hidden_tasks_dir, filename), "r") as file:
                     solution_files.append(file.read())
     except FileNotFoundError:
-        print("Error: Solution files not found in .hidden_tasks directory.")
+        print(f"Error: Solution files not found in .hidden_tasks directory of branch {branch_name}.")
         return None
 
     if not solution_files:
-        print("Error: No Java solution files found in .hidden_tasks.")
+        print(f"Error: No Java solution files found in .hidden_tasks directory of branch {branch_name}.")
         return None
 
     return "\n\n".join(solution_files)
 
 def load_test_code():
+    gen_test_dir = "gen_test"
+
+    # Ensure the gen_test directory exists
+    if not os.path.exists(gen_test_dir):
+        print(f"Error: gen_test directory does not exist in branch {branch_name}.")
+        return None
+
     test_files = []
     try:
-        for filename in os.listdir("gen_test"):
+        for filename in os.listdir(gen_test_dir):
             if filename.endswith(".java"):
-                with open(os.path.join("gen_test", filename), "r") as file:
+                with open(os.path.join(gen_test_dir, filename), "r") as file:
                     test_files.append(file.read())
     except FileNotFoundError:
-        print("Error: Test files not found in gen_test directory.")
+        print(f"Error: Test files not found in gen_test directory of branch {branch_name}.")
         return None
 
     if not test_files:
-        print("Error: No Java test files found in gen_test.")
+        print(f"Error: No Java test files found in gen_test directory of branch {branch_name}.")
         return None
 
     return "\n\n".join(test_files)
@@ -121,12 +128,12 @@ def save_template(template_code):
     with open(template_file_path, "w") as file:
         file.write(template_code)
 
-def commit_and_push_changes(branch_name, directory):
+def commit_and_push_changes(branch_name, directory_path):
     try:
         subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"], check=True)
         subprocess.run(["git", "config", "--global", "user.name", "github-actions"], check=True)
 
-        subprocess.run(["git", "add", directory], check=True)
+        subprocess.run(["git", "add", directory_path], check=True)
         subprocess.run(["git", "commit", "-m", "Add generated template code"], check=True)
         subprocess.run(
             ["git", "push", "--set-upstream", "origin", branch_name],
