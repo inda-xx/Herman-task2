@@ -6,6 +6,12 @@ def main(api_key, branch_name):
         print("Error: OpenAI API key is missing.")
         sys.exit(1)
 
+    # Debugging: Print the current directory
+    print(f"Current directory: {os.getcwd()}")
+    
+    # Debugging: List all files in the current directory
+    print("Files in current directory:", os.listdir("."))
+
     # Load the solution
     solution_code = load_solution_code()
     if not solution_code:
@@ -26,6 +32,13 @@ def main(api_key, branch_name):
     commit_and_push_changes(branch_name, "gen_src")
 
 def load_solution_code():
+    # Debugging: List files in .hidden_tasks
+    if os.path.exists(".hidden_tasks"):
+        print("Files in .hidden_tasks directory:", os.listdir(".hidden_tasks"))
+    else:
+        print("Error: .hidden_tasks directory does not exist.")
+        return None
+
     solution_files = []
     try:
         for filename in os.listdir(".hidden_tasks"):
