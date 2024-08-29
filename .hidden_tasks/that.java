@@ -1,0 +1,1 @@
+class that can move, interact with `Enemy` objects, and track score changes based on encounters and specified 'treasure' locations. Each Java 
