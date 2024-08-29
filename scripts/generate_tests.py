@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import re
 from openai import OpenAI
 
 def main(api_key, branch_name):
@@ -18,13 +17,22 @@ def main(api_key, branch_name):
         print(f"Error checking out branch {branch_name}: {e}")
         sys.exit(1)
 
-    # Read the solution code
+    # Read the solution code from the .hidden_tasks directory
+    solution_files = []
     try:
-        with open(".hidden_tasks/new_task_solution.java", "r") as file:
-            solution = file.read()
+        for filename in os.listdir(".hidden_tasks"):
+            if filename.endswith(".java"):
+                with open(os.path.join(".hidden_tasks", filename), "r") as file:
+                    solution_files.append(file.read())
     except FileNotFoundError:
-        print("Error: new_task_solution.java file not found.")
+        print("Error: Solution files not found in .hidden_tasks directory.")
         sys.exit(1)
+
+    if not solution_files:
+        print("Error: No Java solution files found in .hidden_tasks.")
+        sys.exit(1)
+
+    solution = "\n\n".join(solution_files)
 
     # Example tests to inspire the model (not to be directly copied)
     example_tests = """
