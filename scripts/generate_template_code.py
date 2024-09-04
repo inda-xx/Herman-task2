@@ -36,15 +36,15 @@ def main(api_key, branch_name):
         print("Error: Failed to generate solution code after multiple retries.")
         sys.exit(1)
 
-    # Ensure the .hidden_tasks directory exists
-    hidden_tasks_dir = os.path.join(".hidden_tasks")
-    os.makedirs(hidden_tasks_dir, exist_ok=True)
+    # Ensure the gen_src directory exists
+    gen_src_dir = os.path.join("gen_src")
+    os.makedirs(gen_src_dir, exist_ok=True)
 
-    # Write the generated code to a Java file
-    write_generated_code_to_files(hidden_tasks_dir, response_content)
+    # Write the generated code to Java files in gen_src
+    write_generated_code_to_files(gen_src_dir, response_content)
 
     # Commit and push changes
-    commit_and_push_changes(branch_name, hidden_tasks_dir)
+    commit_and_push_changes(branch_name, gen_src_dir)
 
 def write_generated_code_to_files(directory, code_content):
     """Write generated Java code to appropriate files in the specified directory."""

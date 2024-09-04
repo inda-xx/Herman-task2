@@ -170,16 +170,15 @@ jobs:
         run: |
           python scripts/generate_template_code.py "${{ secrets.OPENAI_TOKEN }}" "${{ needs.generate-tests.outputs.branch_name }}"
 
-      - name: Move generated files to gen_src
-        run: |
-          mv *.java gen_src/
-
+      # Commit the contents of gen_src
       - name: Commit and push changes
         run: |
           git add gen_src
           git commit -m "Add generated template code in gen_src"
           git push --set-upstream origin ${{ needs.generate-tests.outputs.branch_name }}
 
+
       - name: Set branch name
         id: set-branch-name
         run: echo "::set-output name=branch_name::$(git rev-parse --abbrev-ref HEAD)"
+
