@@ -1,0 +1,1 @@
+class into separate files (`Player.java`, `Enemy.java`, `Game.java`) within the same package or directory to compile and run the game.
