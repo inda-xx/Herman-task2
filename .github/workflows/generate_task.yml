@@ -127,7 +127,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/adversarial_review.py "${{ secrets.OPENAI_TOKEN }}" "tasks/new_task.md" ".hidden_tasks"
+          python scripts/adversarial_solution.py "${{ secrets.OPENAI_TOKEN }}" "tasks/new_task.md" ".hidden_tasks"
 
       - name: Set branch name
         id: set-branch-name
