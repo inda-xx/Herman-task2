@@ -83,6 +83,10 @@ def generate_with_retries(client, prompt, max_retries=3):
     return None
 
 def commit_and_push_changes(branch_name, directory_path):
+    if not branch_name:
+        print("Error: Branch name is empty.")
+        sys.exit(1)
+
     try:
         subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"], check=True)
         subprocess.run(["git", "config", "--global", "user.name", "github-actions"], check=True)
@@ -97,6 +101,7 @@ def commit_and_push_changes(branch_name, directory_path):
     except subprocess.CalledProcessError as e:
         print(f"Error committing and pushing changes: {e}")
         sys.exit(1)
+
 
 if len(sys.argv) != 3:
     print("Error: Missing required command line arguments 'api_key' and 'branch_name'")
