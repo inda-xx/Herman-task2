@@ -194,4 +194,10 @@ jobs:
 
       - name: Set branch name
         id: set-branch-name
-        run: echo "::set-output name=branch_name::$(git rev-parse --abbrev-ref HEAD)"
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          if [ -z "$branch" ]; then
+            echo "Branch name is empty, using fallback 'default-branch'"
+            branch="default-branch"
+          fi
+          echo "::set-output name=branch_name::$branch"

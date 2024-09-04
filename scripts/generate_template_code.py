@@ -51,19 +51,24 @@ def write_generated_code_to_files(directory, code_content):
     file_blocks = code_content.split("class ")
     for block in file_blocks:
         if block.strip():  # Ensure there's content
-            class_name = block.split("{")[0].strip().split()[0]
-            if not class_name.isidentifier():  # Check if the class name is valid
-                print(f"Invalid class name detected: '{class_name}'. Skipping block.")
-                continue
-            
-            file_name = f"{class_name}.java"
-            file_path = os.path.join(directory, file_name)
+            # Validate and extract class name
+            lines = block.splitlines()
+            class_declaration = lines[0].strip() if lines else ""
+            if "{" in class_declaration:
+                class_name = class_declaration.split()[0]
+                if class_name.isidentifier():  # Ensure valid class name
+                    file_name = f"{class_name}.java"
+                    file_path = os.path.join(directory, file_name)
+                    try:
+                        with open(file_path, "w") as java_file:
+                            java_file.write("class " + block)
+                    except IOError as e:
+                        print(f"Error writing file {file_name}: {e}")
+                else:
+                    print(f"Invalid class name detected: '{class_name}'. Skipping block.")
+            else:
+                print(f"Malformed class declaration detected: {class_declaration}. Skipping block.")
 
-            try:
-                with open(file_path, "w") as java_file:
-                    java_file.write("class " + block)
-            except IOError as e:
-                print(f"Error writing file {file_name}: {e}")
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
