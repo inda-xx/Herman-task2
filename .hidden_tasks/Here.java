@@ -1,0 +1,1 @@
+class Here is the Java solution for the Maze Runner game with three classes: `Player`, `Enemy`, and `Game`. Each 
