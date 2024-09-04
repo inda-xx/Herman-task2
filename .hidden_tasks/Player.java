@@ -1,5 +1,4 @@
 class Player {
-    // Fields
     private String name;
     private int score;
     private int xPosition;
@@ -8,12 +7,12 @@ class Player {
     // Constructor
     public Player(String name, int x, int y) {
         this.name = name;
-        this.score = 0; // Initialize score to 0
+        this.score = 0;    // Initialize score to 0
         this.xPosition = x;
         this.yPosition = y;
     }
 
-    // Getters and Setters
+    // Getter and Setter for name
     public String getName() {
         return name;
     }
@@ -22,6 +21,7 @@ class Player {
         this.name = name;
     }
 
+    // Getter and Setter for score
     public int getScore() {
         return score;
     }
@@ -30,6 +30,7 @@ class Player {
         this.score = score;
     }
 
+    // Getter and Setter for xPosition
     public int getXPosition() {
         return xPosition;
     }
@@ -38,6 +39,7 @@ class Player {
         this.xPosition = xPosition;
     }
 
+    // Getter and Setter for yPosition
     public int getYPosition() {
         return yPosition;
     }
@@ -46,23 +48,27 @@ class Player {
         this.yPosition = yPosition;
     }
 
-    // Methods
+    // Method to move the player
     public void move(int x, int y) {
         this.xPosition += x;
         this.yPosition += y;
         System.out.println(name + " moved to position: (" + xPosition + ", " + yPosition + ")");
     }
 
+    // Method to interact with an enemy
     public void interactWithEnemy(Enemy enemy) {
         System.out.println(name + " encountered an " + enemy.getEnemyType());
         // Interaction logic can be added here.
     }
 
+    // Method to increase the player's score
     public void increaseScore(int points) {
         this.score += points;
         System.out.println(name + "'s score is now: " + score);
     }
 }
+```
 
-// Enemy.java
+Enemy.java:
+```java
 public 

@@ -1,5 +1,4 @@
 class Enemy {
-    // Fields
     private String enemyType;
     private int xPosition;
     private int yPosition;
@@ -11,7 +10,7 @@ class Enemy {
         this.yPosition = y;
     }
 
-    // Getters and Setters
+    // Getter and Setter for enemyType
     public String getEnemyType() {
         return enemyType;
     }
@@ -20,6 +19,7 @@ class Enemy {
         this.enemyType = enemyType;
     }
 
+    // Getter and Setter for xPosition
     public int getXPosition() {
         return xPosition;
     }
@@ -28,6 +28,7 @@ class Enemy {
         this.xPosition = xPosition;
     }
 
+    // Getter and Setter for yPosition
     public int getYPosition() {
         return yPosition;
     }
@@ -36,6 +37,8 @@ class Enemy {
         this.yPosition = yPosition;
     }
 }
+```
 
-// Game.java
+Game.java:
+```java
 public 
