@@ -1,9 +1,8 @@
 class GameEntity {
-
-    // Fields of the GameEntity class
+    // Declare private fields for encapsulation
     private String name;
-    private int x;    // Representing the x-coordinate
-    private int y;    // Representing the y-coordinate
+    private int x;
+    private int y;
     private int score;
     private boolean isAlive;
 
@@ -16,7 +15,7 @@ class GameEntity {
         this.isAlive = isAlive;
     }
 
-    // Getters and setters for encapsulation
+    // Getter and setter for name
     public String getName() {
         return name;
     }
@@ -25,6 +24,7 @@ class GameEntity {
         this.name = name;
     }
 
+    // Getter and setter for x
     public int getX() {
         return x;
     }
@@ -33,6 +33,7 @@ class GameEntity {
         this.x = x;
     }
 
+    // Getter and setter for y
     public int getY() {
         return y;
     }
@@ -41,6 +42,7 @@ class GameEntity {
         this.y = y;
     }
 
+    // Getter and setter for score
     public int getScore() {
         return score;
     }
@@ -49,6 +51,7 @@ class GameEntity {
         this.score = score;
     }
 
+    // Getter and setter for isAlive
     public boolean isAlive() {
         return isAlive;
     }
@@ -57,12 +60,12 @@ class GameEntity {
         this.isAlive = isAlive;
     }
 
-    // Method to print the status of the GameEntity
+    // Method to print the current status
     public void printStatus() {
-        System.out.println("Name: " + this.name);
-        System.out.println("Position: (" + this.x + ", " + this.y + ")");
-        System.out.println("Score: " + this.score);
-        System.out.println("Is Alive: " + this.isAlive);
+        System.out.println("Name: " + name);
+        System.out.println("Position: (" + x + ", " + y + ")");
+        System.out.println("Score: " + score);
+        System.out.println("Is Alive: " + isAlive);
     }
 
     // Method to move the GameEntity to a new position
@@ -71,23 +74,23 @@ class GameEntity {
         this.y = newY;
     }
 
-    // Method to add points to the GameEntity's score
+    // Method to add points to the current score
     public void addScore(int points) {
         this.score += points;
     }
 
-    // Main method to demonstrate the functionality of the GameEntity class
+    // Main method for demonstration purposes
     public static void main(String[] args) {
-        // Creating a new GameEntity object
+        // Create a new GameEntity using the constructor
         GameEntity player = new GameEntity("Hero", 0, 0, 0, true);
 
-        // Demonstrate methods on the GameEntity object
+        // Print initial status
         player.printStatus();
-        
-        // Move the player and update the score
+
+        // Move the player and add score
         player.move(5, 10);
         player.addScore(15);
-        
+
         // Print the updated status
         player.printStatus();
     }
