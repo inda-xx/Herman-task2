@@ -1,192 +1,119 @@
-# 🚀 Simple Java Game: Player vs. Enemies
+# Maze Runner Game Development
 
-Dive into the exciting world of game development with this Java assignment! You will create a basic game application with player movement, a scoring system, and enemy interactions.
+For this exercise, you will develop a simple game application modeled in Java, where players navigate through a maze, encounter enemies, and score points by reaching checkpoints. You will strengthen your understanding of designing Java classes, working with fields, and implementing interactions between game objects.
 
-### 💀 Deadline
-Complete this assignment by **Friday, November 30th**.
+### 🕑 Deadline
 
-### 👩‍🏫 Instructions
-For detailed instructions on how to complete and submit this assignment, please refer to the [course instructions](https://yourcourse.edu/assignments).
+This project should be completed before the exercise, on **Friday 23rd September**.
 
-### 📝 Preparation
-Before you start, ensure you've completed the following readings and exercises:
+### 👨‍🏫 Instructions
 
-- [Understanding Classes and Objects in Java](https://yourcourse.edu/module3/classes-and-objects)
-- If you haven't already, register for the course platform with the key `game-dev-23` at [our learning site](https://yourcourse.edu).
+For instructions on submitting the assignment, please refer to the [assignments section of the course instructions](https://gits-15.sys.kth.se/inda-22/course-instructions#assignments).
 
-> **Note:** The material may slightly differ from last year, so moving ahead is helpful if needed.
+### 📚 Preparation
 
-### ✅ Learning Goals
+To effectively complete this assignment, engage with the OLI material for Module 3.
 
-After finishing this assignment, you should be able to:
+- Read [Object-Oriented Programming Principles](https://kth.oli.cmu.edu/jcourse/webui/syllabus/module.do?context=f5e5a808ac1f088812f2a8ce315bac60)
+- Ensure you have registered for the course on [OLI](https://kth.oli.cmu.edu/) using the course key `dd1337-ht22`.
 
-* Design Java classes
-* Add instance fields
-* Add a constructor method
-* Create *getters* and *setters*
-* Print to the terminal
-* Use the `main` method
-* Understand Scope (or *variable shadowing*)
+> **Assistant's Note:** Module content may slightly vary; feel free to explore beyond specified material if needed.
 
-### 🚨 Troubleshooting Guide
-Follow these steps if you encounter issues:
+### 🎯 Learning Goals
 
-1. Review this week's [frequently asked questions](https://yourcourse.edu/help/faqs).
-2. Post your question in the forum by creating a [New Topic](https://yourcourse.edu/forum/new).
-3. Reach out to a Teaching Assistant during [lab hours](https://yourcourse.edu/lab-schedule).
+This assignment will help you achieve the following learning goals:
 
-Collaborate with peers, but **do not share code directly**!
+- Designing Java classes
+- Adding instance fields
+- Adding a constructor method
+- Creating *getters* and *setters*
+- Printing to the terminal
+- Using the `main` method
+- Understanding Scope (or *variable shadowing*)
 
-### 🎮 Assignment: Build Your Game!
+### 🛠 Troubleshooting Guide
 
-In this assignment, you will develop a simple 2D game featuring player movement, a dynamic scoring system, and exciting enemy interactions. Let's begin your journey to become a game developer!
+If you encounter any issues:
 
-#### Exercise 1 -- Player Class
-Begin by creating a `Player.java` class in the `src` folder. This class should have the following fields:
+1. Check the [posted issues](https://gits-15.sys.kth.se/inda-22/help/issues) to see if others have faced similar problems.
+2. Post a new query via a [New Issue](https://gits-15.sys.kth.se/inda-22/help/issues/new), with a descriptive title starting with "Task *x*: *brief problem description*".
+3. Visit a TA during the [weekly lab](https://queue.csc.kth.se/Queue/INDA) session for additional assistance.
 
-- `String name`
-- `int score`
-- `int positionX`
-- `int positionY`
+Collaboration is encouraged; however, sharing answers verbatim is discouraged.
 
-<details>
-  <summary> 🛠 Example Code </summary>
+### 🎮 Assignment
 
-  ```java
-  public class Player {
-  
-      private String name;
-      private int score;
-      private int positionX;
-      private int positionY;
-  
-      public Player(String name) {
-          this.name = name;
-          this.score = 0; // Starting score
-          this.positionX = 0; // Starting position
-          this.positionY = 0;
-      }
-  
-      // Getter and Setter methods for each field
-      public String getName() { return name; }
-      public int getScore() { return score; }
-      public int getPositionX() { return positionX; }
-      public int getPositionY() { return positionY; }
-      
-      public void setPositionX(int x) { this.positionX = x; }
-      public void setPositionY(int y) { this.positionY = y; }
-      public void increaseScore(int points) { this.score += points; }
-  
-      public void printInfo() {
-          System.out.println("Player: " + name);
-          System.out.println("Score: " + score);
-          System.out.println("Position: (" + positionX + ", " + positionY + ")");
-      }
-  }
-  ```
+In this assignment, you're tasked with creating a simple Maze Runner game in Java. The game features a player navigating a maze, collecting points, and avoiding or confronting enemies.
 
-  Use the provided structure to create player objects with initial values and methods to modify their state.
-</details>
+#### Exercise 3.0 -- Designing the Classes
 
-#### Exercise 2 -- Enemy Class
-Create an `Enemy.java` class to represent game adversaries. It should include:
+Create three classes: `Player`, `Enemy`, and `Game`.
 
-- `String type`
-- `int positionX`
-- `int positionY`
-- `int damage`
+1. **Player Class:**
 
-<details>
-  <summary> 🛠 Example Code </summary>
+    - **Instance Fields**: `String name`, `int score`, `int positionX`, `int positionY`
+    - **Methods**: 
+      - Constructor to initialize the player's name and starting position
+      - Getter and setter methods for each field
 
-  ```java
-  public class Enemy {
+2. **Enemy Class:**
 
-      private String type;
-      private int positionX;
-      private int positionY;
-      private int damage;
+    - **Instance Fields**: `String type`, `int positionX`, `int positionY`
+    - **Methods**:
+      - Constructor to initialize the enemy type and position
+      - Getter and setter methods for each field
 
-      public Enemy(String type, int damage) {
-          this.type = type;
-          this.damage = damage;
-          this.positionX = (int) (Math.random() * 100); // Random initial position
-          this.positionY = (int) (Math.random() * 100);
-      }
+3. **Game Class:**
 
-      // Getter methods
-      public String getType() { return type; }
-      public int getDamage() { return damage; }
-      public int getPositionX() { return positionX; }
-      public int getPositionY() { return positionY; }
-  }
-  ```
+    - **Methods**:
+      - `public static void main(String[] args)` to instantiate Player and Enemy objects, initiate game logic, and interact with user input
 
-  These enemies will randomly appear and interact with the player. Implement and test basic movement logic by using constructors and methods.
-</details>
+Ensure proper encapsulation through private fields and public accessor/mutator methods. Use the `main` method for instantiating objects and operating game logic.
 
-#### Exercise 3 -- Player Movement
-Implement a `move` method in the `Player` class allowing the player to navigate the game world. Movement options include:
+#### Exercise 3.1 -- Implementing Player Movement
 
-- Up
-- Down
-- Left
-- Right
+Enhance the `Player` class to include:
 
-<details>
-  <summary> 🛠 Implementation Example </summary>
+- **Method**: `move(String direction)`, which changes the player's coordinates based on the input direction (i.e., "up", "down", "left", "right").
+- Within the `main` method, implement a simple loop to take keyboard input for player movement and print position updates to the terminal.
 
-  ```java
-  public void move(String direction) {
-      switch (direction.toLowerCase()) {
-          case "up": positionY++; break;
-          case "down": positionY--; break;
-          case "left": positionX--; break;
-          case "right": positionX++; break;
-          default: System.out.println("Invalid move!"); break;
-      }
-      System.out.println("Player moved " + direction + ". New position: (" + positionX + ", " + positionY + ")");
-  }
-  ```
+#### Exercise 3.2 -- Scoring System
 
-  This method allows your player objects to interact with their environment by moving around.
-</details>
+Incorporate a scoring mechanism:
 
-#### Exercise 4 -- Interaction with Enemies
-Develop an interaction method where if a `Player` comes within a certain distance (e.g., `1` unit) of an `Enemy`, the player's score decreases by the enemy's damage value.
+- **Method in Player Class**: `increaseScore(int points)`, increasing the player’s score.
+- Each time the player reaches a checkpoint, called from `main`, invoke `increaseScore()` and print the updated score.
 
-<details>
-  <summary> 🛠 Interaction Implementation </summary>
+#### Exercise 3.3 -- Enemy Interaction
 
-  ```java
-  public void interact(Enemy enemy) {
-      if (Math.abs(this.positionX - enemy.getPositionX()) <= 1 && 
-          Math.abs(this.positionY - enemy.getPositionY()) <= 1) {
-          this.score -= enemy.getDamage();
-          System.out.println("Hit by " + enemy.getType() + "! Score decreased to: " + this.score);
-      }
-  }
-  ```
+Implement a basic enemy interaction feature:
 
-  This ensures realistic interactions, reflecting adversaries' proximity impact.
-</details>
+- **Method in Game Class**: `checkForEnemies()`, which checks the player's position against enemy positions.
+- If an enemy is at the player's position, print "Enemy encountered!" to the terminal.
 
-#### Exercise 5 -- Variable Shadowing
-Consider potential variable shadowing issues with similar field and method parameters. Ensure correct usage of `this` to reference instance fields. Analyze these examples:
+#### Exercise 3.4 -- Printing Game State
+
+Implement a `printGameState()` method in the `Game` class to print the current game state, including player position, score, and presence of nearby enemies.
+
+#### Exercise 3.5 -- Understanding Variable Shadowing
+
+Analyze and resolve the following variable shadowing case from your game. Consider using `this` keyword to distinguish between instance fields and parameters:
 
 ```java
-public class Example {
-    private int sampleValue = 42;
+public class Maze {
+    private int width = 10;
 
-    public void showValue(int sampleValue) {
-        System.out.println(sampleValue); // It prints method parameter instead of instance field.
+    public void resize(int width) {
+        width = width * 2; // Incorrectly modifies the parameter, not the instance field
+        System.out.println("Maze width: " + this.width); // Use 'this.width' to reference the field
+    }
+
+    public static void main(String[] args){
+        new Maze().resize(5);
     }
 }
 ```
 
-Utilize these insights to prevent variable shadowing issues in your game classes.
+Reflect on how variable shadowing impacts your game's logic and adjust accordingly using `this`.
 
-### 🐞 Encounter a Bug or Error?
-Notify us by opening a [New Issue](https://yourcourse.edu/help/issues/new) with "Game Assignment Error:" followed by a summary. Acknowledgments will be given for reporting valid bugs!
-
-Good luck, and have fun creating your game! 🎮
+> **Assistant's Note:** Distinguish between local variables and instance fields for accurate code functionality.
