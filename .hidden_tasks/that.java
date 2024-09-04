@@ -1,0 +1,1 @@
+class that models either a player or an enemy in a simple game application. The methods included provide typical functionalities for managing these characters and enable basic interaction between player and enemy.
