@@ -1,192 +1,170 @@
-# 🚀 Simple Java Game: Player vs. Enemies
+# 🎮 Simple Game Application: Java Adventures!
 
-Dive into the exciting world of game development with this Java assignment! You will create a basic game application with player movement, a scoring system, and enemy interactions.
+Welcome to your exciting journey into game development with Java! In this task, you'll create a simple game that simulates a player's movement, scores tracking, and interactions with enemies. Through this project, you'll refine your skills in Java, focusing on essential concepts like class design, instance fields, constructors, getters and setters, and more. Ready your keyboards, and let's begin!
 
-### 💀 Deadline
-Complete this assignment by **Friday, November 30th**.
+### 📅 Deadline
 
-### 👩‍🏫 Instructions
-For detailed instructions on how to complete and submit this assignment, please refer to the [course instructions](https://yourcourse.edu/assignments).
+Please complete this assignment before **Friday, 23rd September**.
 
-### 📝 Preparation
-Before you start, ensure you've completed the following readings and exercises:
+### 📜 Instructions
 
-- [Understanding Classes and Objects in Java](https://yourcourse.edu/module3/classes-and-objects)
-- If you haven't already, register for the course platform with the key `game-dev-23` at [our learning site](https://yourcourse.edu).
+Submit your assignment by following the detailed guidelines in the [assignments section of the course instructions](https://your-course-url.com).
 
-> **Note:** The material may slightly differ from last year, so moving ahead is helpful if needed.
+### 🏆 Learning Goals
 
-### ✅ Learning Goals
+This week's learning objectives include:
 
-After finishing this assignment, you should be able to:
+- Designing Java classes
+- Adding instance fields
+- Adding a constructor method
+- Creating *getters* and *setters*
+- Printing to the terminal
+- Using the `main` method
+- Understanding scope and *variable shadowing*
 
-* Design Java classes
-* Add instance fields
-* Add a constructor method
-* Create *getters* and *setters*
-* Print to the terminal
-* Use the `main` method
-* Understand Scope (or *variable shadowing*)
+### 🔍 Preparation
+
+Ensure you're well-prepared by reviewing the materials below:
+
+- Read [Understanding Java Classes](https://java-course-materials-url).
+- Complete the exercises in Module 3 on [Encapsulation and Constructors](https://java-course-materials-url).
+
+> **Note:** These materials are crucial for completing the assignment successfully.
 
 ### 🚨 Troubleshooting Guide
-Follow these steps if you encounter issues:
 
-1. Review this week's [frequently asked questions](https://yourcourse.edu/help/faqs).
-2. Post your question in the forum by creating a [New Topic](https://yourcourse.edu/forum/new).
-3. Reach out to a Teaching Assistant during [lab hours](https://yourcourse.edu/lab-schedule).
+If you encounter any issues, follow this procedure:
 
-Collaborate with peers, but **do not share code directly**!
+1. Consult [this week's questions](https://course-issues-url). Maybe others have already encountered your issue.
+2. If you don't find your problem, create a [New Issue](https://course-issues-url/new). Clear titles help, e.g., "Task 3: Problem with player movement".
+3. Ask a TA during lab hours. Check your schedule for session timings.
 
-### 🎮 Assignment: Build Your Game!
+Discuss with peers for clarity, but avoid sharing exact solutions!
 
-In this assignment, you will develop a simple 2D game featuring player movement, a dynamic scoring system, and exciting enemy interactions. Let's begin your journey to become a game developer!
+### 🎮 Assignment
 
-#### Exercise 1 -- Player Class
-Begin by creating a `Player.java` class in the `src` folder. This class should have the following fields:
+In this task, you're tasked with building a simple text-based game using Java. The game involves a player character navigating their environment while avoiding and interacting with enemies. Let's dive into the details:
 
-- `String name`
-- `int score`
-- `int positionX`
-- `int positionY`
+#### Exercise 3.0 -- The Game World
 
-<details>
-  <summary> 🛠 Example Code </summary>
+Create a new class called `GameWorld.java`. This class should model the game world, including basic settings like the player's starting coordinates and initial score.
 
-  ```java
-  public class Player {
+- **Fields**: Define instance fields for player position (`int` x, `int` y), score (`int`), and any other relevant properties (e.g., list of enemies).
+
+- **Main Method**: Initialize the game world and print a welcome message.
   
-      private String name;
-      private int score;
-      private int positionX;
-      private int positionY;
-  
-      public Player(String name) {
-          this.name = name;
-          this.score = 0; // Starting score
-          this.positionX = 0; // Starting position
-          this.positionY = 0;
-      }
-  
-      // Getter and Setter methods for each field
-      public String getName() { return name; }
-      public int getScore() { return score; }
-      public int getPositionX() { return positionX; }
-      public int getPositionY() { return positionY; }
-      
-      public void setPositionX(int x) { this.positionX = x; }
-      public void setPositionY(int y) { this.positionY = y; }
-      public void increaseScore(int points) { this.score += points; }
-  
-      public void printInfo() {
-          System.out.println("Player: " + name);
-          System.out.println("Score: " + score);
-          System.out.println("Position: (" + positionX + ", " + positionY + ")");
-      }
-  }
-  ```
-
-  Use the provided structure to create player objects with initial values and methods to modify their state.
-</details>
-
-#### Exercise 2 -- Enemy Class
-Create an `Enemy.java` class to represent game adversaries. It should include:
-
-- `String type`
-- `int positionX`
-- `int positionY`
-- `int damage`
-
-<details>
-  <summary> 🛠 Example Code </summary>
-
-  ```java
-  public class Enemy {
-
-      private String type;
-      private int positionX;
-      private int positionY;
-      private int damage;
-
-      public Enemy(String type, int damage) {
-          this.type = type;
-          this.damage = damage;
-          this.positionX = (int) (Math.random() * 100); // Random initial position
-          this.positionY = (int) (Math.random() * 100);
-      }
-
-      // Getter methods
-      public String getType() { return type; }
-      public int getDamage() { return damage; }
-      public int getPositionX() { return positionX; }
-      public int getPositionY() { return positionY; }
-  }
-  ```
-
-  These enemies will randomly appear and interact with the player. Implement and test basic movement logic by using constructors and methods.
-</details>
-
-#### Exercise 3 -- Player Movement
-Implement a `move` method in the `Player` class allowing the player to navigate the game world. Movement options include:
-
-- Up
-- Down
-- Left
-- Right
-
-<details>
-  <summary> 🛠 Implementation Example </summary>
-
-  ```java
-  public void move(String direction) {
-      switch (direction.toLowerCase()) {
-          case "up": positionY++; break;
-          case "down": positionY--; break;
-          case "left": positionX--; break;
-          case "right": positionX++; break;
-          default: System.out.println("Invalid move!"); break;
-      }
-      System.out.println("Player moved " + direction + ". New position: (" + positionX + ", " + positionY + ")");
-  }
-  ```
-
-  This method allows your player objects to interact with their environment by moving around.
-</details>
-
-#### Exercise 4 -- Interaction with Enemies
-Develop an interaction method where if a `Player` comes within a certain distance (e.g., `1` unit) of an `Enemy`, the player's score decreases by the enemy's damage value.
-
-<details>
-  <summary> 🛠 Interaction Implementation </summary>
-
-  ```java
-  public void interact(Enemy enemy) {
-      if (Math.abs(this.positionX - enemy.getPositionX()) <= 1 && 
-          Math.abs(this.positionY - enemy.getPositionY()) <= 1) {
-          this.score -= enemy.getDamage();
-          System.out.println("Hit by " + enemy.getType() + "! Score decreased to: " + this.score);
-      }
-  }
-  ```
-
-  This ensures realistic interactions, reflecting adversaries' proximity impact.
-</details>
-
-#### Exercise 5 -- Variable Shadowing
-Consider potential variable shadowing issues with similar field and method parameters. Ensure correct usage of `this` to reference instance fields. Analyze these examples:
-
 ```java
-public class Example {
-    private int sampleValue = 42;
+public class GameWorld {
+    // Instance fields
+    private int x, y;
+    private int score;
 
-    public void showValue(int sampleValue) {
-        System.out.println(sampleValue); // It prints method parameter instead of instance field.
+    public static void main(String[] args) {
+        // Create an instance of the game world
+        GameWorld game = new GameWorld();
+
+        // Print the initial state
+        System.out.println("Welcome to Java Adventures! Starting at: " + game.getX() + ", " + game.getY());
+        System.out.println("Initial Score: " + game.getScore());
     }
+
+    // Constructor and methods will be added in further exercises
 }
 ```
 
-Utilize these insights to prevent variable shadowing issues in your game classes.
+#### Exercise 3.1 -- Player Class
 
-### 🐞 Encounter a Bug or Error?
-Notify us by opening a [New Issue](https://yourcourse.edu/help/issues/new) with "Game Assignment Error:" followed by a summary. Acknowledgments will be given for reporting valid bugs!
+Create a `Player` class to represent the player character in the game.
 
-Good luck, and have fun creating your game! 🎮
+- **Fields**: Add fields for name (`String`), health (`int`), and position (`int` x, `int` y).
+
+- **Constructor**: Initialize fields with parameters. Implement constructors to facilitate player initialization.
+
+- **Getters and Setters**: Ensure all fields have appropriate accessors and mutators.
+
+```java
+public class Player {
+    private String name;
+    private int health;
+    private int x, y;
+
+    public Player(String name, int health, int x, int y) {
+        this.name = name;
+        this.health = health;
+        this.x = x;
+        this.y = y;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Implement other getters and setters
+}
+```
+
+#### Exercise 3.2 -- Player Movement
+
+Implement methods in the `Player` class to control movement.
+
+- **move(int dx, int dy)**: Adjust the player's position. Demonstrate usage in the `main` method of `GameWorld`.
+
+```java
+// Inside class Player
+public void move(int dx, int dy) {
+    this.x += dx;
+    this.y += dy;
+    System.out.println(name + " moved to: " + x + ", " + y);
+}
+```
+
+#### Exercise 3.3 -- Scoring System
+
+Add scoring functionality to `GameWorld`.
+
+- **Methods**: Implement methods to increase/decrease the score and print to the terminal.
+
+```java
+// Inside class GameWorld
+public void increaseScore(int points) {
+    this.score += points;
+    System.out.println("Score increased by " + points + ". Current score: " + score);
+}
+```
+
+#### Exercise 3.4 -- Enemies and Interactions
+
+Create an `Enemy` class with fields similar to `Player`. Implement interactions such as attacks.
+
+- **Enemy Class**: Include fields like name, health, position.
+- **Interaction**: Create attack methods in both `Player` and `Enemy`, with actions printing out results.
+
+```java
+public class Enemy {
+    // Similar fields and methods as Player
+    // Implement interaction logic
+}
+```
+
+#### Exercise 3.5 -- Variable Shadowing
+
+Explore and solve issues related to variable shadowing. Modify examples to demonstrate understanding using the `this` keyword.
+
+```java
+public class ShadowExample {
+    private int number = 10; // I want this number printed
+
+    public void printNumber() {
+        int number = 20;
+        System.out.println(this.number); // Use 'this' to access instance field
+    }
+
+    // Implement in main method
+}
+```
+
+Good luck, and enjoy your coding adventure! Remember, successful games are a blend of creativity and strong programming. Happy coding! 🎮
