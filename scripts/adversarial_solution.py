@@ -1,5 +1,6 @@
 import os
 import sys
+import difflib
 from openai import OpenAI
 
 def main(api_key, task_file, solution_dir):
@@ -14,13 +15,13 @@ def main(api_key, task_file, solution_dir):
         sys.exit(1)
 
     # Read the existing solution files in .hidden_tasks
-    solution_files = []
+    solution_files = {}
     for filename in os.listdir(solution_dir):
         if filename.endswith(".java"):
             with open(os.path.join(solution_dir, filename), "r") as file:
-                solution_files.append(file.read())
+                solution_files[filename] = file.read()
 
-    solution_content = "\n\n".join(solution_files)
+    solution_content = "\n\n".join(solution_files.values())
 
     # Prompt to improve the solution with sanitization
     prompt = (
@@ -40,8 +41,8 @@ def main(api_key, task_file, solution_dir):
         print("Error: Failed to generate an improved solution.")
         sys.exit(1)
 
-    # Overwrite the existing solution files with the improved solution
-    write_improved_solution(solution_dir, improved_solution)
+    # Compare and show changes made
+    show_changes_and_write_improved_solution(solution_dir, solution_files, improved_solution)
 
 def generate_with_retries(client, prompt, max_retries=3):
     """Retries generating solution with the OpenAI API."""
@@ -61,17 +62,48 @@ def generate_with_retries(client, prompt, max_retries=3):
                 print("Retrying...")
     return None
 
-def write_improved_solution(directory, improved_solution):
-    """Overwrite the existing solution files with the sanitized and improved solution."""
+def show_changes_and_write_improved_solution(directory, original_files, improved_solution):
+    """Compare and show changes, then overwrite the existing solution files with the improved solution."""
+    
+    # Split the improved solution into separate classes
     file_blocks = improved_solution.split("class ")
+    changes_made = []
+    
     for block in file_blocks:
         if block.strip():
             class_name = block.split("{")[0].strip().split()[0]
             file_name = f"{class_name}.java"
             file_path = os.path.join(directory, file_name)
 
+            # Retrieve original file content
+            original_content = original_files.get(file_name, "")
+
+            # Reconstruct improved class content
+            improved_content = "class " + block
+
+            # Display changes using difflib
+            diff = list(difflib.unified_diff(
+                original_content.splitlines(), 
+                improved_content.splitlines(), 
+                fromfile=f"Original {file_name}", 
+                tofile=f"Improved {file_name}", 
+                lineterm=""
+            ))
+
+            if diff:
+                changes_made.append(f"Changes in {file_name}:\n" + "\n".join(diff))
+
+            # Write the improved content back to the file
             with open(file_path, "w") as java_file:
-                java_file.write("class " + block)
+                java_file.write(improved_content)
+    
+    # Output the changes made
+    if changes_made:
+        print("=== Changes Made ===")
+        for change in changes_made:
+            print(change)
+    else:
+        print("No changes were necessary.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
