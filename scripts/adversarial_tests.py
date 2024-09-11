@@ -1,5 +1,6 @@
 import os
 import re
+import sys  # <-- Adding the missing import
 from openai import OpenAI
 
 def main(api_key, test_dir):
