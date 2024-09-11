@@ -1,0 +1,1 @@
+class in its corresponding file (`Player.java`, `Enemy.java`, `Game.java`, `Shadow1.java`, `Creature.java`) so they can compile and execute properly.

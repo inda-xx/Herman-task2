@@ -1,0 +1,1 @@
+class Here is the complete Java solution for the described game, following the task instructions. Each 
