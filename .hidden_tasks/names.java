@@ -1,0 +1,1 @@
+class names (Player.java, Enemy.java, and Game.java) and will create a simple console-based game. This solution covers player movement, score updates, and basic enemy interaction.
