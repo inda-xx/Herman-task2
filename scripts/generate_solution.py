@@ -20,7 +20,7 @@ def main(api_key, branch_name):
 
     # Inspirational code snippet for the solution
     inspirational_code = """
-    //REPOBEE-SANITIZER-SHRED
+    
     class Indamon {
 
         // Put your fields here!
