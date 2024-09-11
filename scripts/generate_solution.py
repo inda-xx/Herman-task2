@@ -117,8 +117,9 @@ def main(api_key, branch_name):
         f"### Inspirational Code Snippet\n\n"
         f"{inspirational_code}\n\n"
         "IMPORTANT: The response must be plain Java code with no markdown formatting or ```java blocks. "
-        "Ensure that the response is ready to be saved directly as .java files. "
-        "Each class should be placed in an appropriately named file."
+        "Ensure that each class is entirely self-contained and is not left incomplete. "
+        "No part of the next file should be left in the current file. "
+        "Ensure that each class is saved in its own appropriately named file, and that there are no 'leftover' initializers or class definitions from subsequent files."
     )
 
     # Call OpenAI API to generate the solution code
