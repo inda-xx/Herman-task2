@@ -1,0 +1,1 @@
+class has its own `main` method for testing the respective functionalities.
