@@ -1,0 +1,1 @@
+class to manage enemy details and interactions. Save `Player.java` and `Enemy.java` in the same directory to ensure proper interaction between these classes during execution.
