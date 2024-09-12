@@ -1,16 +1,11 @@
 import os
 import re
-import sys
-import difflib
+import sys  # <-- Adding the missing import
 from openai import OpenAI
 
 def main(api_key, test_dir):
     if not api_key:
         print("Error: OpenAI API key is missing.")
-        sys.exit(1)
-
-    if not os.path.exists(test_dir):
-        print(f"Error: The directory '{test_dir}' does not exist.")
         sys.exit(1)
 
     client = OpenAI(api_key=api_key)
@@ -26,13 +21,10 @@ def main(api_key, test_dir):
         test_file_path = os.path.join(test_dir, test_file)
         
         with open(test_file_path, "r") as file:
-            original_test_content = file.read()
+            test_content = file.read()
 
         # Send the test content to OpenAI for adversarial review and improvement
-        improved_content = adversarial_review(client, original_test_content)
-
-        # Display the diff between the original and improved content
-        display_diff(original_test_content, improved_content, test_file)
+        improved_content = adversarial_review(client, test_content)
 
         # Save the improved test content
         with open(test_file_path, "w") as file:
@@ -102,19 +94,6 @@ def clean_up_imports(test_code):
         test_code = test_code.replace(imp, '', 1)
     test_code = '\n'.join(unique_imports) + '\n' + test_code
     return test_code
-
-def display_diff(original_content, improved_content, file_name):
-    """Display the differences between the original and improved test content."""
-    print(f"\n--- Changes in {file_name} ---")
-    diff = difflib.unified_diff(
-        original_content.splitlines(),
-        improved_content.splitlines(),
-        fromfile='Original',
-        tofile='Improved',
-        lineterm=''
-    )
-    for line in diff:
-        print(line)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

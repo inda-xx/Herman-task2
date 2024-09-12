@@ -156,19 +156,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install openai
 
-      # DEBUG STEP: List all files to ensure gen_test/ exists
-      - name: List directory structure
-        run: |
-          echo "Current directory structure:"
-          ls -R
-      
       - name: Adversarial Review - Improve Tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/adversarial_tests.py "${{ secrets.OPENAI_TOKEN }}" "gen_test/"
-
+  
   generate-template-code:
     runs-on: ubuntu-latest
     needs: generate-tests
@@ -180,17 +174,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.generate-tests.outputs.branch_name }}
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install openai
-
       - name: Generate template code
         id: generate-template-code
         env:
@@ -198,7 +189,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/generate_template_code.py "${{ secrets.OPENAI_TOKEN }}" "${{ needs.generate-tests.outputs.branch_name }}"
-
       - name: Set branch name
         id: set-branch-name
         run: |
