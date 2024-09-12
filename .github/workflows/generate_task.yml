@@ -174,7 +174,7 @@ jobs:
   
   generate-template-code:
     runs-on: ubuntu-latest
-    needs: generate-tests
+    needs: adversarial-review
     outputs:
       branch_name: ${{ steps.set-branch-name.outputs.branch_name }}
     steps:
@@ -182,7 +182,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.generate-tests.outputs.branch_name }}
+          ref: ${{ needs.adversarial-review.outputs.branch_name }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -197,7 +197,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/generate_template_code.py "${{ secrets.OPENAI_TOKEN }}" "${{ needs.generate-tests.outputs.branch_name }}"
+          python scripts/generate_template_code.py "${{ secrets.OPENAI_TOKEN }}" "${{ needs.adversarial-review.outputs.branch_name }}"
       - name: Set branch name
         id: set-branch-name
         run: |
