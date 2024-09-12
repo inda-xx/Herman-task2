@@ -30,6 +30,7 @@ def main(api_key, task_file, solution_dir):
         f"### Task Description\n{task_description}\n\n"
         f"### Current Solution\n{solution_content}\n\n"
         "IMPORTANT: Provide an improved version of the solution with corrections, if necessary, and ensure that the updated code is complete and functional."
+        "Check for missing imports based on the usage of classes like List, Scanner, HashMap, etc. Add any missing imports accordingly."
         "The response must be in plain Java code with no markdown formatting or ```java blocks."
     )
 
@@ -38,6 +39,9 @@ def main(api_key, task_file, solution_dir):
     
     # Clean up the improved solution
     improved_solution = clean_up_non_code_content(improved_solution)
+
+    # Check for missing imports and add them
+    improved_solution = check_and_add_missing_imports(improved_solution)
 
     # Overwrite the existing solution files with the cleaned and improved solution
     write_improved_solution(solution_dir, improved_solution)
@@ -67,6 +71,38 @@ def clean_up_non_code_content(solution_code):
             cleaned_code += block + "\n\n"
 
     return cleaned_code.strip()
+
+def check_and_add_missing_imports(solution_code):
+    """
+    Check the solution for missing imports based on the usage of common Java classes
+    and add necessary imports if missing.
+    """
+    required_imports = {
+        "List": "import java.util.List;",
+        "ArrayList": "import java.util.ArrayList;",
+        "Map": "import java.util.Map;",
+        "HashMap": "import java.util.HashMap;",
+        "Scanner": "import java.util.Scanner;",
+        "Set": "import java.util.Set;",
+        "HashSet": "import java.util.HashSet;",
+        "Collections": "import java.util.Collections;",
+        "Random": "import java.util.Random;"
+    }
+
+    # Extract existing imports from the solution
+    existing_imports = re.findall(r'^\s*import .*;', solution_code, re.MULTILINE)
+
+    # Add missing imports
+    imports_to_add = []
+    for class_name, import_statement in required_imports.items():
+        if class_name in solution_code and import_statement not in existing_imports:
+            imports_to_add.append(import_statement)
+
+    # Prepend missing imports at the start of the solution code
+    if imports_to_add:
+        solution_code = "\n".join(imports_to_add) + "\n\n" + solution_code
+
+    return solution_code
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
