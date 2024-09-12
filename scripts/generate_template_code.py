@@ -85,12 +85,15 @@ def review_template_with_openai(client, template_content):
     Uses the OpenAI API to review the generated template and make any final adjustments.
     """
     prompt = (
+        f"This is a code template for students to solve your job is to review it to make sure it is structurally correct."
         f"Review the following Java code template, generated for students to fill in the missing parts. "
         f"Ensure that the structure is correct, no methods are missing, and the placeholders for implementation are clear. "
         f"Make sure that imports, method signatures, and class structures are properly defined. "
         f"Do not provide any additional implementation, but adjust any formatting or structure issues.\n\n"
         f"### Template Code:\n{template_content}\n\n"
         "IMPORTANT: Provide a revised version of the template that ensures all structures are complete."
+        "IMPORTANT: The response must be plain Java code with no markdown formatting or ```java blocks. Ensure that the response is ready to be saved directly as a .java file."
+        "DO NOT INCLUDE ANY TEXT int the code files except for the potential comments."
     )
 
     reviewed_template = generate_with_retries(client, prompt, max_retries=3)
