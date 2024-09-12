@@ -136,6 +136,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/generate_tests.py "${{ secrets.OPENAI_TOKEN }}" "${{ needs.generate-solution.outputs.branch_name }}"
+      - name: Set branch name
+        id: set-branch-name
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          if [ -z "$branch" ]; then
+            echo "Branch name is empty, using fallback 'default-branch'"
+            branch="default-branch"
+          fi
+          echo "::set-output name=branch_name::$branch"
 
   adversarial-test-review:
     runs-on: ubuntu-latest
