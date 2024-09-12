@@ -155,6 +155,9 @@ def write_generated_code_to_files(directory, code_content):
         # Clean up the block, removing content after the last closing brace
         cleaned_block = clean_class_block(block)
 
+        # Ensure the necessary imports are included
+        cleaned_block = check_and_add_missing_imports(cleaned_block)
+
         # Prepend any import statements (gathered from previous blocks)
         cleaned_block = current_imports + cleaned_block
 
@@ -183,6 +186,36 @@ def clean_class_block(block):
         # Truncate the block at the last closing brace
         block = block[:last_closing_brace + 1]
     
+    return block
+
+def check_and_add_missing_imports(block):
+    """
+    Check the class block for missing imports and add necessary imports based on the content.
+    """
+    required_imports = {
+        "List": "import java.util.List;",
+        "ArrayList": "import java.util.ArrayList;",
+        "Map": "import java.util.Map;",
+        "HashMap": "import java.util.HashMap;",
+        "Scanner": "import java.util.Scanner;",
+        "Set": "import java.util.Set;",
+        "HashSet": "import java.util.HashSet;",
+        "Random": "import java.util.Random;"
+    }
+
+    # Extract existing imports from the block
+    existing_imports = re.findall(r'^\s*import .*;', block, re.MULTILINE)
+
+    # Add missing imports
+    imports_to_add = []
+    for class_name, import_statement in required_imports.items():
+        if class_name in block and import_statement not in existing_imports:
+            imports_to_add.append(import_statement)
+
+    # Prepend missing imports at the start of the block
+    if imports_to_add:
+        block = "\n".join(imports_to_add) + "\n\n" + block
+
     return block
 
 def generate_with_retries(client, prompt, max_retries=3):
