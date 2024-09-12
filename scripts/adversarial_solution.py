@@ -90,12 +90,28 @@ def write_improved_solution(directory, improved_solution):
     file_blocks = improved_solution.split("class ")
     for block in file_blocks:
         if block.strip():
-            class_name = block.split("{")[0].strip().split()[0]
+            # Extract the class name and ensure it's valid
+            class_name_parts = block.split("{")[0].strip().split()
+            if len(class_name_parts) > 0:
+                class_name = class_name_parts[0]
+                if not class_name.isidentifier():
+                    print(f"Skipping block with invalid class name: '{class_name}'")
+                    continue
+            else:
+                print("Skipping block due to missing class name.")
+                continue
+
+            # Construct file name and path
             file_name = f"{class_name}.java"
             file_path = os.path.join(directory, file_name)
 
-            with open(file_path, "w") as java_file:
-                java_file.write("class " + block)
+            try:
+                # Write the improved content to the file
+                with open(file_path, "w") as java_file:
+                    java_file.write("class " + block)
+                print(f"Successfully wrote {file_name}")
+            except IOError as e:
+                print(f"Error writing file {file_name}: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
