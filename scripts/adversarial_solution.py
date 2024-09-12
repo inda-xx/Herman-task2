@@ -62,6 +62,13 @@ def generate_with_retries(client, prompt, max_retries=3):
                 print("Retrying...")
     return None
 
+def clean_up_non_code_content(solution_code):
+    # Remove any lines that contain explanations or non-code content
+    solution_code = re.sub(r"Here's.*", "", solution_code)
+    solution_code = re.sub(r"Save.*", "", solution_code)
+
+    return solution_code
+
 def write_improved_solution(directory, improved_solution):
     """Overwrite the existing solution files with the improved solution."""
     file_blocks = improved_solution.split("class ")
