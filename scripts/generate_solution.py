@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import subprocess
 from openai import OpenAI
