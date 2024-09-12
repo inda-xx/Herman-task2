@@ -109,6 +109,7 @@ def main(api_key, branch_name):
         "Ensure that each class is entirely self-contained and is not left incomplete. "
         "No part of the next file should be left in the current file. "
         "Ensure that each class is saved in its own appropriately named file, and that there are no 'leftover' initializers or class definitions from subsequent files."
+        "Ensure all imports, public classes, and everything related to the class is included in the appropriate file."
         "Write NO TEXT beyond the code itself, whatsoever. "
     )
 
@@ -132,40 +133,44 @@ def write_generated_code_to_files(directory, code_content):
     """
     Write generated Java code to appropriate files in the specified directory.
     Handles cases where leftover comments or initializations are present.
+    Also ensures that import statements and public class declarations are captured.
     """
     leftover_content = ""  # To capture leftover content before the first class
-    file_blocks = code_content.split("class ")
-    
-    for block in file_blocks:
-        if block.strip():  # Ensure there's content
-            class_name_parts = block.split("{")[0].strip().split()
-            if len(class_name_parts) > 0:
-                class_name = class_name_parts[0]
-                if not class_name.isidentifier():
-                    # If we have leftover content, append it to the next class
-                    leftover_content += block
-                    continue
-            else:
-                print("Skipping block due to missing class name.")
-                continue
+    current_imports = ""   # To capture and carry over import statements
+    file_blocks = re.split(r'\b(class|public\s+class)\b', code_content)  # Split on 'class' or 'public class'
 
-            # Clean up the block, removing content after the last closing brace
-            cleaned_block = clean_class_block("class " + block)
+    for i in range(1, len(file_blocks), 2):  # Iterate over every "class"/"public class" block
+        class_declaration = file_blocks[i] + file_blocks[i + 1]  # Reattach split 'class' or 'public class'
+        block = leftover_content + class_declaration
 
-            # Add any leftover content before the class declaration
-            cleaned_block = leftover_content + cleaned_block
-            leftover_content = ""  # Clear leftover content for the next iteration
+        # Extract class name
+        class_name_parts = re.split(r'\s+', class_declaration.split("{")[0].strip())
+        if len(class_name_parts) > 1:
+            class_name = class_name_parts[1]  # Second word is the class name
+        else:
+            print(f"Skipping block due to missing class name: {class_name_parts}")
+            continue
 
-            # Write cleaned code to a file
-            file_name = f"{class_name}.java"
-            file_path = os.path.join(directory, file_name)
+        # Clean up the block, removing content after the last closing brace
+        cleaned_block = clean_class_block(block)
 
-            try:
-                with open(file_path, "w") as java_file:
-                    java_file.write(cleaned_block)
-                print(f"Successfully wrote {file_name}")
-            except IOError as e:
-                print(f"Error writing file {file_name}: {e}")
+        # Prepend any import statements (gathered from previous blocks)
+        cleaned_block = current_imports + cleaned_block
+
+        # Clear leftover and import content for the next file
+        leftover_content = ""
+        current_imports = ""
+
+        # Write cleaned code to a file
+        file_name = f"{class_name}.java"
+        file_path = os.path.join(directory, file_name)
+
+        try:
+            with open(file_path, "w") as java_file:
+                java_file.write(cleaned_block)
+            print(f"Successfully wrote {file_name}")
+        except IOError as e:
+            print(f"Error writing file {file_name}: {e}")
 
 def clean_class_block(block):
     """Ensure the block only contains content until the last closing brace."""
