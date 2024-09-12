@@ -138,18 +138,18 @@ def write_generated_code_to_files(directory, code_content):
     """
     leftover_content = ""  # To capture leftover content before the first class
     current_imports = ""   # To capture and carry over import statements
-    file_blocks = re.split(r'\b(class|public\s+class)\b', code_content)  # Split on 'class' or 'public class'
+    file_blocks = re.split(r'\b(class|public\s+class|abstract\s+class|final\s+class)\b', code_content)  # Split on different class declarations
 
-    for i in range(1, len(file_blocks), 2):  # Iterate over every "class"/"public class" block
+    for i in range(1, len(file_blocks), 2):  # Iterate over every class block
         class_declaration = file_blocks[i] + file_blocks[i + 1]  # Reattach split 'class' or 'public class'
         block = leftover_content + class_declaration
 
         # Extract class name
-        class_name_parts = re.split(r'\s+', class_declaration.split("{")[0].strip())
-        if len(class_name_parts) > 1:
-            class_name = class_name_parts[1]  # Second word is the class name
+        class_name_match = re.search(r'class\s+([A-Za-z_]\w*)\s*{', block)  # Match 'class ClassName {'
+        if class_name_match:
+            class_name = class_name_match.group(1)  # Extract the class name
         else:
-            print(f"Skipping block due to missing class name: {class_name_parts}")
+            print(f"Skipping block due to missing class name in block: {block[:50]}")
             continue
 
         # Clean up the block, removing content after the last closing brace
