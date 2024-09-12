@@ -97,20 +97,33 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.generate-solution.outputs.branch_name }}
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install openai
+
       - name: Adversarial Review - Improve Solution
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/adversarial_solution.py "${{ secrets.OPENAI_TOKEN }}" "tasks/new_task.md" ".hidden_tasks"
+
+      - name: Set branch name
+        id: set-branch-name
+        run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          if [ -z "$branch" ]; then
+            echo "Branch name is empty, using fallback 'default-branch'"
+            branch="default-branch"
+          fi
+          echo "::set-output name=branch_name::$branch"
 
   generate-tests:
     runs-on: ubuntu-latest

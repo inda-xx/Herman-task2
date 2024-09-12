@@ -20,14 +20,15 @@ def main(api_key, branch_name):
 
     # Combine task description into a single prompt for solution generation
     prompt = (
-        f"Based on the following task description, generate a complete and functional Java solution that meets all the requirements. "
-        f"The solution should be well-structured, use meaningful variable names, include necessary comments for clarity, "
-        f"and be ready to pass a comprehensive set of unit tests.\n\n"
-        f"### Task Description\n\n"
-        f"{task_description}\n\n"
-        "IMPORTANT: The response must be plain Java code with no markdown formatting or ```java blocks. "
-        "Ensure that the response is ready to be saved directly as .java files. "
-        "Each class should be placed in an appropriately named file."
+    f"Based on the following task description, generate a complete and functional Java solution that meets all the requirements. "
+    f"The solution should be well-structured, use meaningful variable names, include necessary comments for clarity, "
+    f"and be ready to pass a comprehensive set of unit tests. "
+    f"Make sure the code only includes Java class definitions and nothing else.\n\n"
+    f"### Task Description\n\n"
+    f"{task_description}\n\n"
+    "IMPORTANT: The response must ONLY contain plain Java code with no markdown formatting or explanations. "
+    "Ensure that the response is ready to be saved directly as .java files. "
+    "Each class should be placed in an appropriately named file."
     )
 
     # Call OpenAI API to generate the solution code
@@ -47,18 +48,26 @@ def main(api_key, branch_name):
     commit_and_push_changes(branch_name, gen_src_dir)
 
 def write_generated_code_to_files(directory, code_content):
-    """Write generated Java code to appropriate files in the specified directory."""
+    """Write generated Java code to appropriate files in the specified directory, cleaning unnecessary text."""
     file_blocks = code_content.split("class ")
     for block in file_blocks:
-        if block.strip():  # Ensure there's content
-            # Validate and extract class name
+        block = block.strip()
+
+        # Remove any markdown formatting artifacts
+        block = block.replace("```", "")
+        block = block.replace("java", "")
+
+        if block:
             lines = block.splitlines()
             class_declaration = lines[0].strip() if lines else ""
             if "{" in class_declaration:
                 class_name = class_declaration.split()[0]
-                if class_name.isidentifier():  # Ensure valid class name
+                if class_name.isidentifier():
+                    # Skip blocks that are invalid or do not follow the Java class naming pattern
                     file_name = f"{class_name}.java"
                     file_path = os.path.join(directory, file_name)
+
+                    # Write to file
                     try:
                         with open(file_path, "w") as java_file:
                             java_file.write("class " + block)
@@ -68,6 +77,8 @@ def write_generated_code_to_files(directory, code_content):
                     print(f"Invalid class name detected: '{class_name}'. Skipping block.")
             else:
                 print(f"Malformed class declaration detected: {class_declaration}. Skipping block.")
+ 
+
 
 
 def generate_with_retries(client, prompt, max_retries=3):
