@@ -1,0 +1,1 @@
+class includes a shadowing example where a local variable shadows an instance field, demonstrating proper use of the `this` keyword to access instance data.
