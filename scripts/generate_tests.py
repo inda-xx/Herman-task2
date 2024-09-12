@@ -126,8 +126,7 @@ def main(api_key, branch_name):
     prompt = (
         f"Given the following Java solution, generate a set of high-quality unit tests. "
         f"Ensure the tests are thorough, robust, and cover all edge cases, including invalid inputs, boundary conditions, and performance considerations. "
-        f"The tests should follow best practices, including descriptive naming conventions, setup and teardown methods if necessary, and detailed assertions to validate expected behavior. "
-        f"Ensure that the tests use the correct imports and that each class is placed in the correct file as per Java naming conventions.\n\n"
+        f"Ensure the tests use the correct imports and that each class is placed in the correct file as per Java naming conventions.\n\n"
         f"### Solution\n{solution}\n\n"
         f"### Example Tests (for inspiration only)\n{example_tests}\n\n"
         "IMPORTANT: The response must be plain Java code with no markdown formatting or ```java blocks. Ensure that the response is ready to be saved directly as a .java file."
@@ -163,36 +162,47 @@ def generate_with_retries(client, prompt, max_retries=3):
     return None
 
 def write_generated_tests_to_files(directory, code_content):
-    """Write generated Java tests to separate files based on class names."""
-    file_blocks = code_content.split("class ")
-    for block in file_blocks:
-        if block.strip():  # Ensure there's content
-            class_name = block.split("{")[0].strip().split()[0]
-            if not class_name.isidentifier():  # Check if the class name is valid
-                print(f"Invalid class name detected: '{class_name}'. Skipping block.")
-                continue
-            
-            # Construct the file content
-            package_declaration = "package test;\n\n"
-            imports = (
-                "import org.junit.Before;\n"
-                "import org.junit.Test;\n"
-                "import static org.junit.Assert.*;\n\n"
-            )
-            file_content = package_declaration + imports + "class " + block
+    """
+    Write generated Java tests to separate files based on class names.
+    Handles cases where leftover comments or initializations are present.
+    Also ensures that import statements and public class declarations are captured.
+    """
+    leftover_content = ""  # To capture leftover content before the first class
+    file_blocks = re.split(r'\b(class|public\s+class|abstract\s+class|final\s+class)\b', code_content)  # Split on different class declarations
 
-            file_name = f"{class_name}.java"
-            file_path = os.path.join(directory, file_name)
+    for i in range(1, len(file_blocks), 2):  # Iterate over every class block
+        class_declaration = file_blocks[i] + file_blocks[i + 1]  # Reattach split 'class' or 'public class'
+        block = leftover_content + class_declaration
 
-            # Ensure the directory exists
-            os.makedirs(directory, exist_ok=True)
+        # Extract class name
+        class_name_match = re.search(r'class\s+([A-Za-z_]\w*)\s*{', block)  # Match 'class ClassName {'
+        if class_name_match:
+            class_name = class_name_match.group(1)  # Extract the class name
+        else:
+            print(f"Skipping block due to missing class name in block: {block[:50]}")
+            continue
 
-            try:
-                with open(file_path, "w") as java_file:
-                    java_file.write(file_content)
-            except IOError as e:
-                print(f"Error writing file {file_name}: {e}")
+        # Construct the file content
+        package_declaration = "package test;\n\n"
+        imports = (
+            "import org.junit.Before;\n"
+            "import org.junit.Test;\n"
+            "import static org.junit.Assert.*;\n\n"
+        )
+        file_content = package_declaration + imports + "class " + block
 
+        file_name = f"{class_name}Test.java"
+        file_path = os.path.join(directory, file_name)
+
+        # Ensure the directory exists
+        os.makedirs(directory, exist_ok=True)
+
+        try:
+            with open(file_path, "w") as java_file:
+                java_file.write(file_content)
+            print(f"Successfully wrote {file_name}")
+        except IOError as e:
+            print(f"Error writing file {file_name}: {e}")
 
 def commit_and_push_changes(branch_name, directory):
     try:
