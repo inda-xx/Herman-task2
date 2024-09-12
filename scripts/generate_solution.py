@@ -20,7 +20,7 @@ def main(api_key, branch_name):
 
     # Inspirational code snippet for the solution
     inspirational_code = """
-    
+
     class Indamon {
 
         // Put your fields here!
@@ -120,6 +120,7 @@ def main(api_key, branch_name):
         "Ensure that each class is entirely self-contained and is not left incomplete. "
         "No part of the next file should be left in the current file. "
         "Ensure that each class is saved in its own appropriately named file, and that there are no 'leftover' initializers or class definitions from subsequent files."
+        "Write NO TEXT beyond the code itself, whatsoever. "
     )
 
     # Call OpenAI API to generate the solution code
