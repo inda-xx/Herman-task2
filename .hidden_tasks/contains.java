@@ -1,0 +1,1 @@
+class contains the `main` method, which orchestrates the interactions between the player and an enemy as part of a simple gameplay simulation.
