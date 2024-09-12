@@ -1,0 +1,1 @@
+class includes methods for movement, scoring, and interaction with enemies. The code is structured well with meaningful names, encapsulation through private instance variables, and public getters and setters.

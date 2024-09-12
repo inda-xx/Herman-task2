@@ -1,0 +1,1 @@
+class manages the player's properties and actions, while the Enemy 
