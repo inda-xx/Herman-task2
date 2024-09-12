@@ -10,103 +10,91 @@ def main(api_key, branch_name):
 
     client = OpenAI(api_key=api_key)
 
-    # Read the new task description
+    # Read the existing solution code from .hidden_tasks directory
+    solution_dir = ".hidden_tasks"
+    solution_files = []
     try:
-        with open("tasks/new_task.md", "r") as file:
-            task_description = file.read()
+        for filename in os.listdir(solution_dir):
+            if filename.endswith(".java"):
+                with open(os.path.join(solution_dir, filename), "r") as file:
+                    solution_files.append((filename, file.read()))
     except FileNotFoundError:
-        print("Error: new_task.md file not found.")
+        print("Error: Solution files not found in .hidden_tasks directory.")
         sys.exit(1)
 
-    # Combine task description into a single prompt for template generation
-    prompt = (
-        f"Based on the following task description, generate a Java template that provides the class structure, method signatures, and high-level comments, "
-        f"but removes detailed implementations, making it suitable for students to fill in the missing parts.\n\n"
-        f"### Task Description\n\n"
-        f"{task_description}\n\n"
-        "IMPORTANT: The response must contain plain Java code, with class and method signatures, but with method bodies left empty or commented. "
-        "Keep necessary imports but remove unnecessary complexity. The response should be suitable to use directly as .java files for students to complete."
-    )
-
-    # Call OpenAI API to generate the template
-    response_content = generate_with_retries(client, prompt, max_retries=3)
-    if response_content is None:
-        print("Error: Failed to generate template code after multiple retries.")
+    if not solution_files:
+        print("Error: No Java solution files found in .hidden_tasks.")
         sys.exit(1)
 
-    # Ensure the gen_src directory exists
-    gen_src_dir = os.path.join("gen_src")
-    os.makedirs(gen_src_dir, exist_ok=True)
+    # Generate a template from the solution for each file
+    for filename, solution_content in solution_files:
+        template_content = generate_template_from_solution(solution_content)
 
-    # Write the generated template to Java files in gen_src
-    write_generated_code_to_files(gen_src_dir, response_content)
+        # Review the generated template using OpenAI API
+        reviewed_template = review_template_with_openai(client, template_content)
+
+        # Write the final reviewed template to gen_src directory
+        gen_src_dir = "gen_src"
+        os.makedirs(gen_src_dir, exist_ok=True)
+        file_path = os.path.join(gen_src_dir, filename)
+
+        try:
+            with open(file_path, "w") as template_file:
+                template_file.write(reviewed_template)
+            print(f"Successfully created and reviewed template for {filename}")
+        except IOError as e:
+            print(f"Error writing file {filename}: {e}")
 
     # Commit and push changes
     commit_and_push_changes(branch_name, gen_src_dir)
 
-def write_generated_code_to_files(directory, code_content):
+def generate_template_from_solution(solution_content):
     """
-    Write generated Java code to appropriate files in the specified directory.
-    Remove detailed logic but keep class structure and method signatures for students to fill in.
+    Simplifies the solution code to create a student template by removing method bodies
+    and complex logic while keeping method signatures and class structures intact.
     """
-    file_blocks = code_content.split("class ")
-    
-    for block in file_blocks:
-        block = block.strip()
-
-        if block:
-            # Remove any markdown artifacts and unnecessary text
-            block = block.replace("```", "").replace("java", "").strip()
-            
-            lines = block.splitlines()
-            class_declaration = lines[0].strip() if lines else ""
-            
-            if "{" in class_declaration:
-                # Extract the class name and create the file
-                class_name = class_declaration.split()[1]
-                if class_name.isidentifier():
-                    file_name = f"{class_name}.java"
-                    file_path = os.path.join(directory, file_name)
-
-                    # Simplify the block by leaving method signatures, and removing logic
-                    simplified_block = simplify_block(block)
-
-                    try:
-                        with open(file_path, "w") as java_file:
-                            java_file.write(simplified_block)
-                        print(f"Successfully wrote {file_name}")
-                    except IOError as e:
-                        print(f"Error writing file {file_name}: {e}")
-                else:
-                    print(f"Invalid class name detected: '{class_name}'. Skipping block.")
-            else:
-                print(f"Malformed class declaration detected: {class_declaration}. Skipping block.")
-
-def simplify_block(block):
-    """
-    Simplify the class block by removing method bodies and keeping only method signatures and class structure.
-    """
-    simplified_block = []
+    template_lines = []
     in_method_body = False
-    
-    for line in block.splitlines():
+
+    for line in solution_content.splitlines():
         stripped_line = line.strip()
 
-        # If we encounter the start of a method
+        # Detect the start of a method (i.e., a line ending with '{')
         if stripped_line.endswith("{") and not stripped_line.startswith("class"):
-            simplified_block.append(line)
-            in_method_body = True  # Start ignoring lines inside the method body
+            template_lines.append(line)  # Keep the method signature
+            in_method_body = True  # Enter method body, which will be removed
         elif in_method_body:
-            # Look for the closing brace that marks the end of the method body
+            # Detect the end of a method (a single '}')
             if stripped_line == "}":
-                simplified_block.append(line)  # Keep the closing brace
-                in_method_body = False  # Stop ignoring lines
+                template_lines.append(line)  # Keep the closing brace
+                in_method_body = False  # Exit method body
+            # Replace method body with a TODO placeholder
             else:
-                simplified_block.append("    // TODO: Implement this method")  # Add a placeholder
+                if "return" in stripped_line:
+                    # Retain return types for completeness
+                    template_lines.append("    // TODO: Implement logic and return the appropriate value.")
+                else:
+                    template_lines.append("    // TODO: Implement this method.")
         else:
-            simplified_block.append(line)
+            template_lines.append(line)  # Keep the rest of the class structure intact
 
-    return "\n".join(simplified_block)
+    return "\n".join(template_lines)
+
+def review_template_with_openai(client, template_content):
+    """
+    Uses the OpenAI API to review the generated template and make any final adjustments.
+    """
+    prompt = (
+        f"Review the following Java code template, generated for students to fill in the missing parts. "
+        f"Ensure that the structure is correct, no methods are missing, and the placeholders for implementation are clear. "
+        f"Make sure that imports, method signatures, and class structures are properly defined. "
+        f"Do not provide any additional implementation, but adjust any formatting or structure issues.\n\n"
+        f"### Template Code:\n{template_content}\n\n"
+        "IMPORTANT: Provide a revised version of the template that ensures all structures are complete."
+    )
+
+    reviewed_template = generate_with_retries(client, prompt, max_retries=3)
+    return reviewed_template if reviewed_template else template_content
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
@@ -120,7 +108,7 @@ def generate_with_retries(client, prompt, max_retries=3):
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"Error generating template code: {e}")
+            print(f"Error generating response: {e}")
             if attempt < max_retries - 1:
                 print("Retrying...")
     return None
