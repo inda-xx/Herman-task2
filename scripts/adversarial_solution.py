@@ -30,7 +30,8 @@ def main(api_key, task_file, solution_dir):
         f"### Task Description\n{task_description}\n\n"
         f"### Current Solution\n{solution_content}\n\n"
         "IMPORTANT: Provide an improved version of the solution with corrections, if necessary, and ensure that the updated code is complete and functional."
-        "Check for missing imports based on the usage of classes like List, Scanner, HashMap, etc. Add any missing imports accordingly."
+        "Check for missing imports, misplaced code, and correct all invalid or incomplete class definitions."
+        "Ensure all methods are correctly implemented, all imports are included, and the solution can be compiled and run without errors."
         "The response must be in plain Java code with no markdown formatting or ```java blocks."
     )
 
@@ -103,6 +104,24 @@ def check_and_add_missing_imports(solution_code):
         solution_code = "\n".join(imports_to_add) + "\n\n" + solution_code
 
     return solution_code
+
+def validate_class_definitions(improved_solution):
+    """
+    Validates that all class definitions are correct, braces are balanced,
+    and no class is missing methods, constructors, or other required elements.
+    """
+    class_blocks = re.findall(r'class\s+\w+\s*{[\s\S]*?}', improved_solution)
+    
+    for block in class_blocks:
+        if block.count("{") != block.count("}"):
+            print(f"Warning: Unbalanced braces detected in the following class block:\n{block}")
+        
+        # Perform other validation steps like method presence, constructor checks, etc.
+        # Example: Ensure each class has at least one method or constructor.
+        if not re.search(r'(public|private|protected)\s+[\w<>\[\]]+\s+\w+\(', block):
+            print(f"Warning: No method or constructor detected in class block:\n{block}")
+    
+    return improved_solution
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
