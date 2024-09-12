@@ -1,127 +1,122 @@
 import os
 import re
 import sys
+import subprocess
 from openai import OpenAI
 
-def main(api_key, task_file, solution_dir):
-    client = OpenAI(api_key=api_key)
-
-    # Read the task description
-    try:
-        with open(task_file, "r") as file:
-            task_description = file.read()
-    except FileNotFoundError:
-        print("Error: task description file not found.")
+def main(api_key, branch_name):
+    if not api_key:
+        print("Error: OpenAI API key is missing.")
         sys.exit(1)
 
-    # Read the existing solution files in the solution directory
-    solution_files = []
-    for filename in os.listdir(solution_dir):
-        if filename.endswith(".java"):
-            with open(os.path.join(solution_dir, filename), "r") as file:
-                solution_files.append(file.read())
+    client = OpenAI(api_key=api_key)
 
-    solution_content = "\n\n".join(solution_files)
+    # Read the new task description
+    try:
+        with open("tasks/new_task.md", "r") as file:
+            task_description = file.read()
+    except FileNotFoundError:
+        print("Error: new_task.md file not found.")
+        sys.exit(1)
 
-    # Prompt to improve the solution
+    # Prompt to generate a student template
     prompt = (
-        f"Given the following task description and solution code, analyze the solution and improve it. "
-        f"Correct any issues or missing requirements that might be present in the solution.\n\n"
-        f"### Task Description\n{task_description}\n\n"
-        f"### Current Solution\n{solution_content}\n\n"
-        "IMPORTANT: Provide an improved version of the solution with corrections, if necessary, and ensure that the updated code is complete and functional."
-        "Check for missing imports, misplaced code, and correct all invalid or incomplete class definitions."
-        "Ensure all methods are correctly implemented, all imports are included, and the solution can be compiled and run without errors."
-        "The response must be in plain Java code with no markdown formatting or ```java blocks."
+        f"Based on the following task description, generate a Java template where method bodies and complex logic are removed, but class structures, "
+        f"method signatures, and high-level comments remain. Ensure that it is suitable for students to fill in the missing parts.\n\n"
+        f"### Task Description\n\n"
+        f"{task_description}\n\n"
+        "IMPORTANT: Provide only the plain Java code, with method bodies removed and high-level comments intact. "
+        "Remove all complex logic. No explanations or markdown formatting like ```java blocks or plain text should be included."
     )
 
-    # Generate the improved solution
-    improved_solution = generate_with_retries(client, prompt, max_retries=3)
+    # Call OpenAI API to generate the template
+    response_content = generate_with_retries(client, prompt, max_retries=3)
+    if response_content is None:
+        print("Error: Failed to generate template code after multiple retries.")
+        sys.exit(1)
+
+    # Ensure the gen_src directory exists
+    gen_src_dir = os.path.join("gen_src")
+    os.makedirs(gen_src_dir, exist_ok=True)
+
+    # Write the generated code to Java files in gen_src
+    write_generated_code_to_files(gen_src_dir, response_content)
+
+    # Commit and push changes
+    commit_and_push_changes(branch_name, gen_src_dir)
+
+def write_generated_code_to_files(directory, code_content):
+    """
+    Write generated Java code to appropriate files in the specified directory.
+    Remove explanations, ensure only code is written, and simplify method bodies.
+    """
+    # Split content by class declarations
+    file_blocks = re.split(r'\b(class|public\s+class|abstract\s+class|final\s+class)\b', code_content)
+
+    for i in range(1, len(file_blocks), 2):
+        class_declaration = file_blocks[i] + file_blocks[i + 1]
+        block = clean_up_block(class_declaration)
+
+        # Extract class name
+        class_name_match = re.search(r'class\s+([A-Za-z_]\w*)\s*{', block)
+        if class_name_match:
+            class_name = class_name_match.group(1)
+        else:
+            print(f"Skipping block due to missing class name in block: {block[:50]}")
+            continue
+
+        # Simplify the block by removing method bodies
+        simplified_block = simplify_block(block)
+
+        # Write cleaned code to a file
+        file_name = f"{class_name}.java"
+        file_path = os.path.join(directory, file_name)
+
+        try:
+            with open(file_path, "w") as java_file:
+                java_file.write(simplified_block)
+            print(f"Successfully wrote {file_name}")
+        except IOError as e:
+            print(f"Error writing file {file_name}: {e}")
+
+def clean_up_block(block):
+    """
+    Clean up non-code content such as markdown artifacts, explanations, and unnecessary text.
+    """
+    block = block.strip()
+    # Remove non-code artifacts like markdown
+    block = re.sub(r'```.*', '', block)  # Remove any markdown-like ``` blocks
+    # Remove explanations or non-code text
+    block = re.sub(r'Below is.*', '', block)
+    block = re.sub(r'This template.*', '', block)
+    block = re.sub(r'//.*', '', block)  # Optionally, remove high-level comments if not needed
+    return block
+
+def simplify_block(block):
+    """
+    Simplify the class block by removing method bodies and keeping only method signatures.
+    """
+    simplified_block = []
+    in_method_body = False
     
-    # Clean up the improved solution
-    improved_solution = clean_up_non_code_content(improved_solution)
+    for line in block.splitlines():
+        stripped_line = line.strip()
 
-    # Check for missing imports and add them
-    improved_solution = check_and_add_missing_imports(improved_solution)
+        # If we encounter the start of a method
+        if stripped_line.endswith("{") and not stripped_line.startswith("class"):
+            simplified_block.append(line)
+            in_method_body = True  # Start ignoring lines inside the method body
+        elif in_method_body:
+            # Look for the closing brace that marks the end of the method body
+            if stripped_line == "}":
+                simplified_block.append(line)  # Keep the closing brace
+                in_method_body = False  # Stop ignoring lines
+            else:
+                simplified_block.append("    // TODO: Implement this method")  # Add a placeholder
+        else:
+            simplified_block.append(line)
 
-    # Overwrite the existing solution files with the cleaned and improved solution
-    write_improved_solution(solution_dir, improved_solution)
-
-def clean_up_non_code_content(solution_code):
-    """
-    This function cleans up non-code content such as misplaced comments, explanations,
-    and anything outside the last closing brace '}' in each class.
-    """
-    # Remove any lines that contain explanations or non-code content
-    solution_code = re.sub(r"Here's.*", "", solution_code)
-    solution_code = re.sub(r"Save.*", "", solution_code)
-
-    # Ensure that anything outside the last closing '}' is removed
-    cleaned_code = ""
-    for block in solution_code.split("class "):
-        if block.strip():
-            # Add back the 'class ' prefix
-            block = "class " + block
-
-            # Find the last closing '}'
-            last_brace_pos = block.rfind("}")
-            if last_brace_pos != -1:
-                block = block[:last_brace_pos + 1]  # Keep content up to the last '}'
-
-            # Append cleaned block to the result
-            cleaned_code += block + "\n\n"
-
-    return cleaned_code.strip()
-
-def check_and_add_missing_imports(solution_code):
-    """
-    Check the solution for missing imports based on the usage of common Java classes
-    and add necessary imports if missing.
-    """
-    required_imports = {
-        "List": "import java.util.List;",
-        "ArrayList": "import java.util.ArrayList;",
-        "Map": "import java.util.Map;",
-        "HashMap": "import java.util.HashMap;",
-        "Scanner": "import java.util.Scanner;",
-        "Set": "import java.util.Set;",
-        "HashSet": "import java.util.HashSet;",
-        "Collections": "import java.util.Collections;",
-        "Random": "import java.util.Random;"
-    }
-
-    # Extract existing imports from the solution
-    existing_imports = re.findall(r'^\s*import .*;', solution_code, re.MULTILINE)
-
-    # Add missing imports
-    imports_to_add = []
-    for class_name, import_statement in required_imports.items():
-        if class_name in solution_code and import_statement not in existing_imports:
-            imports_to_add.append(import_statement)
-
-    # Prepend missing imports at the start of the solution code
-    if imports_to_add:
-        solution_code = "\n".join(imports_to_add) + "\n\n" + solution_code
-
-    return solution_code
-
-def validate_class_definitions(improved_solution):
-    """
-    Validates that all class definitions are correct, braces are balanced,
-    and no class is missing methods, constructors, or other required elements.
-    """
-    class_blocks = re.findall(r'class\s+\w+\s*{[\s\S]*?}', improved_solution)
-    
-    for block in class_blocks:
-        if block.count("{") != block.count("}"):
-            print(f"Warning: Unbalanced braces detected in the following class block:\n{block}")
-        
-        # Perform other validation steps like method presence, constructor checks, etc.
-        # Example: Ensure each class has at least one method or constructor.
-        if not re.search(r'(public|private|protected)\s+[\w<>\[\]]+\s+\w+\(', block):
-            print(f"Warning: No method or constructor detected in class block:\n{block}")
-    
-    return improved_solution
+    return "\n".join(simplified_block)
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
@@ -135,66 +130,36 @@ def generate_with_retries(client, prompt, max_retries=3):
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"Error generating improved solution: {e}")
+            print(f"Error generating template code: {e}")
             if attempt < max_retries - 1:
                 print("Retrying...")
     return None
 
-def write_improved_solution(directory, improved_solution):
-    """Overwrite the existing solution files with the improved solution."""
-    
-    # Split the solution by class definitions
-    file_blocks = improved_solution.split("class ")
-    
-    for block in file_blocks:
-        if block.strip():
-            # Extract class name
-            class_name_parts = block.split("{")[0].strip().split()
-            if len(class_name_parts) > 0:
-                class_name = class_name_parts[0]
-                if not class_name.isidentifier():
-                    print(f"Skipping block with invalid class name: '{class_name}'")
-                    continue
-            else:
-                print("Skipping block due to missing class name.")
-                continue
-
-            # Clean the block, removing content after the last closing brace
-            cleaned_block = clean_class_block("class " + block)
-
-            # Write cleaned code to a file
-            file_name = f"{class_name}.java"
-            file_path = os.path.join(directory, file_name)
-
-            try:
-                with open(file_path, "w") as java_file:
-                    java_file.write(cleaned_block)
-                print(f"Successfully wrote {file_name}")
-            except IOError as e:
-                print(f"Error writing file {file_name}: {e}")
-
-def clean_class_block(block):
-    """Ensure the block only contains content until the last closing brace."""
-    
-    # Find the position of the last closing brace '}' in the block
-    last_closing_brace = block.rfind("}")
-    
-    if last_closing_brace != -1:
-        # Truncate the block at the last closing brace
-        block = block[:last_closing_brace + 1]
-    
-    # Remove any content before the first class declaration
-    block = re.sub(r'.*?(class\s)', r'class ', block, count=1, flags=re.DOTALL)
-
-    return block
-
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Error: Missing required command line arguments 'api_key', 'task_file', and 'solution_dir'")
+def commit_and_push_changes(branch_name, directory_path):
+    if not branch_name:
+        print("Error: Branch name is empty.")
         sys.exit(1)
 
-    api_key = sys.argv[1]
-    task_file = sys.argv[2]
-    solution_dir = sys.argv[3]
+    try:
+        subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"], check=True)
+        subprocess.run(["git", "config", "--global", "user.name", "github-actions"], check=True)
 
-    main(api_key, task_file, solution_dir)
+        subprocess.run(["git", "add", directory_path], check=True)
+        subprocess.run(["git", "commit", "-m", "Add generated template"], check=True)
+        subprocess.run(
+            ["git", "push", "--set-upstream", "origin", branch_name],
+            check=True,
+            env=dict(os.environ, GIT_ASKPASS='echo', GIT_USERNAME='x-access-token', GIT_PASSWORD=os.getenv('GITHUB_TOKEN'))
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error committing and pushing changes: {e}")
+        sys.exit(1)
+
+if len(sys.argv) != 3:
+    print("Error: Missing required command line arguments 'api_key' and 'branch_name'")
+    sys.exit(1)
+
+api_key = sys.argv[1]
+branch_name = sys.argv[2]
+
+main(api_key, branch_name)
