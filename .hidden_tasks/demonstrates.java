@@ -1,0 +1,1 @@
+class demonstrates a simple scenario where the player moves and interacts with an enemy.
