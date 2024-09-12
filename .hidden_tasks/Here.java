@@ -1,0 +1,1 @@
+class Here is the complete Java solution to the described task, with each 

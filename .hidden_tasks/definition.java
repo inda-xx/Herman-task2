@@ -1,0 +1,1 @@
+class definition prepared for inclusion in separate `.java` files within the `game` package. Ensure that each 
