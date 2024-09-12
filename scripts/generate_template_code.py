@@ -122,8 +122,17 @@ def commit_and_push_changes(branch_name, directory_path):
         subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"], check=True)
         subprocess.run(["git", "config", "--global", "user.name", "github-actions"], check=True)
 
+        # Fetch the latest changes from the remote
+        subprocess.run(["git", "fetch", "origin"], check=True)
+        
+        # Check if there are new changes on the remote branch
+        subprocess.run(["git", "pull", "origin", branch_name], check=True)
+
+        # Stage changes and commit
         subprocess.run(["git", "add", directory_path], check=True)
         subprocess.run(["git", "commit", "-m", "Add generated template"], check=True)
+        
+        # Push the changes
         subprocess.run(
             ["git", "push", "--set-upstream", "origin", branch_name],
             check=True,
