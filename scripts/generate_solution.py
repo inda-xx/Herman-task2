@@ -20,10 +20,9 @@ def main(api_key, branch_name):
 
     # Inspirational code snippet for the solution
     inspirational_code = """
+    // Example class for reference
 
     class Indamon {
-
-        // Put your fields here!
         private String name;
         private int hp;
         private int attack;
@@ -31,7 +30,7 @@ def main(api_key, branch_name):
         boolean fainted;
 
         public Indamon(){
-          // :)
+          // Empty constructor
         }
 
         public Indamon(String name, int hp, int attack, int defense) {
@@ -84,27 +83,17 @@ def main(api_key, branch_name):
 
         public void attack(Indamon foe){
           int attackDamage = this.attack / foe.getDefense();
-          foe.setHp(foe.getHp()-attackDamage);
+          foe.setHp(foe.getHp() - attackDamage);
         }
 
         public static void main(String[] args) {
-          // create a new "Student" object
-          Indamon glassey = new Indamon();
-
-          // assign the instance variables to meaningful values
-          glassey.name = "glassey";
-          glassey.hp = 10;
-          glassey.attack = 5;
-          glassey.defense = 5;
-
-          // get the information of the assigned values
-          System.out.println(glassey.name);
-          System.out.println(glassey.hp);
-          System.out.println(glassey.attack);
-          System.out.println(glassey.defense);
-        } // end main method
-
-    } // end class
+          Indamon glassey = new Indamon("Glassey", 10, 5, 5);
+          System.out.println(glassey.getName());
+          System.out.println(glassey.getHp());
+          System.out.println(glassey.getAttack());
+          System.out.println(glassey.getDefense());
+        }
+    }
     """
 
     # Combine task description and inspirational code into a single prompt for solution generation
@@ -133,30 +122,62 @@ def main(api_key, branch_name):
     hidden_tasks_dir = os.path.join(".hidden_tasks")
     os.makedirs(hidden_tasks_dir, exist_ok=True)
 
-    # Write the generated code to a Java file
+    # Write the generated code to Java files
     write_generated_code_to_files(hidden_tasks_dir, response_content)
 
     # Commit and push changes
     commit_and_push_changes(branch_name, hidden_tasks_dir)
 
 def write_generated_code_to_files(directory, code_content):
-    """Write generated Java code to appropriate files in the specified directory."""
+    """
+    Write generated Java code to appropriate files in the specified directory.
+    Handles cases where leftover comments or initializations are present.
+    """
+    leftover_content = ""  # To capture leftover content before the first class
     file_blocks = code_content.split("class ")
+    
     for block in file_blocks:
         if block.strip():  # Ensure there's content
-            class_name = block.split("{")[0].strip().split()[0]
-            if not class_name.isidentifier():  # Check if the class name is valid
-                print(f"Invalid class name detected: '{class_name}'. Skipping block.")
+            class_name_parts = block.split("{")[0].strip().split()
+            if len(class_name_parts) > 0:
+                class_name = class_name_parts[0]
+                if not class_name.isidentifier():
+                    # If we have leftover content, append it to the next class
+                    leftover_content += block
+                    continue
+            else:
+                print("Skipping block due to missing class name.")
                 continue
-            
+
+            # Clean up the block, removing content after the last closing brace
+            cleaned_block = clean_class_block("class " + block)
+
+            # Add any leftover content before the class declaration
+            cleaned_block = leftover_content + cleaned_block
+            leftover_content = ""  # Clear leftover content for the next iteration
+
+            # Write cleaned code to a file
             file_name = f"{class_name}.java"
             file_path = os.path.join(directory, file_name)
 
             try:
                 with open(file_path, "w") as java_file:
-                    java_file.write("class " + block)
+                    java_file.write(cleaned_block)
+                print(f"Successfully wrote {file_name}")
             except IOError as e:
                 print(f"Error writing file {file_name}: {e}")
+
+def clean_class_block(block):
+    """Ensure the block only contains content until the last closing brace."""
+    
+    # Find the position of the last closing brace '}' in the block
+    last_closing_brace = block.rfind("}")
+    
+    if last_closing_brace != -1:
+        # Truncate the block at the last closing brace
+        block = block[:last_closing_brace + 1]
+    
+    return block
 
 def generate_with_retries(client, prompt, max_retries=3):
     for attempt in range(max_retries):
